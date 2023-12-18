@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FastAPI Example</title>
+</head>
+
+<body>
+    <form id="dataForm">
+        <label for="data">Smart Search:</label>
+        <input type="text" id="data" name="data" oninput="handleInput()" autocomplete="off">
+        <button type="submit" onclick="handleSubmit()">Search</button>
+        <ul id="suggestions"></ul>
+        
+        
+    </form>
+
+    <script>
+        document.getElementById('dataForm').addEventListener('submit', async function (event) {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            const data = formData.get('data');
+
+            // Send data to the backend using fetch
+            const response = await fetch('/process_form', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: new URLSearchParams({
+                    new_search: data
+                }),
+            });
+
+            // Handle the response from the backend
+            const result = await response.json();
+            console.log(result); // Logging the response for demonstration
+
+            // Clear the input field after form submission
+            document.getElementById('data').value = '';
+        });
+
+        function handleSubmit() {
+            // Trigger form submission when the submit button is clicked
+            document.getElementById('dataForm').submit();
+        }
+
+        async function handleInput() {
+            const searchInput = document.getElementById('data');
+            const suggestionsList = document.getElementById('suggestions');
+
+            const response = await fetch('/search/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: new URLSearchParams({
+                    new_search: searchInput.value
+                }),
+            });
+
+            const data = await response.json();
+            const suggestions = data.suggestions;
+
+            suggestionsList.innerHTML = '';
+
+            suggestions.forEach(suggestion => {
+                const listItem = document.createElement('li');
+                listItem.textContent = suggestion;
+                listItem.addEventListener('click', function () {
+                    // When suggestion is clicked, fill the input field
+                    searchInput.value = suggestion;
+                    suggestionsList.innerHTML = ''; // Clear suggestions
+                });
+                suggestionsList.appendChild(listItem);
+            });
+        }
+    </script>
+</body>
+</html>
