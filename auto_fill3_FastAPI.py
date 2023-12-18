@@ -37,7 +37,7 @@ search_history_db=[]
 @app.post("/process_form/")
 async def search(new_search: str = Form(...)):
     search_history_db.append(new_search)
-    search_history_db.count
+    # search_history_db.count
     output=ML_inference.SVC_inference(new_search)
     output_link=output[0]
     return{"output":output_link}
